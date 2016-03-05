@@ -74,35 +74,32 @@ RBNode *getUncle(RBNode *now) {
  */
 
 void rotateRight(RBNode *now) {
+    RBNode *grandP = getGrandP(now);
     RBNode *parent = now->parent;
-    RBNode *tmp = now->left->right;
 
-    parent->right = now->left;
+    if(grandP != NULL){
+        grandP->left = now;
+    }
+    parent->parent = now;
+    parent->left = now->right;
 
-
-    now->left->right = now;
-    now->left->parent = parent;
-
-    now->parent = now->left;
-    now->left = tmp;
-    if (now->left != NULL)
-        now->left->parent = now;
+    now->right = parent;
+    now->parent = grandP;
 
 }
 
 void rotateLeft(RBNode *now) {
+    RBNode *grandP = getGrandP(now);
     RBNode *parent = now->parent;
-    RBNode *tmp = now->right->left;
 
-    parent->left = now->right;
+    if(grandP != NULL){
+        grandP->right = now;
+    }
+    parent->parent = now;
+    parent->right = now->left;
 
-    now->right->left = now;
-    now->right->parent = parent;
-
-    now->parent = now->right;
-    now->right = tmp;
-    if (now->right != NULL)
-        now->right->parent = now;
+    now->left = parent;
+    now->parent = grandP;
 
 
 }
@@ -125,14 +122,16 @@ RBNode *RBinsertAdjust(RBTree *tree, RBNode *now) {
         parent->color = BLACK;
         uncle->color = BLACK;
         grandP->color = RED;
-        return RBinsertAdjust(tree, getGrandP(now));
+        return RBinsertAdjust(tree, grandP);
     } else if (grandP != NULL && parent == grandP->left) {
         if (grandP == ret) {
             ret = parent;
         }
         if (now == parent->right) {
-            ret = now;
-            rotateLeft(parent);
+            if (grandP == ret) {
+                ret = now;
+            }
+            rotateLeft(now);
             now = now->left;
         }
         now->parent->color = BLACK;
@@ -145,8 +144,10 @@ RBNode *RBinsertAdjust(RBTree *tree, RBNode *now) {
             ret = parent;
         }
         if (now == parent->left) {
-            ret = now;
-            rotateRight(parent);
+            if (grandP == ret) {
+                ret = now;
+            }
+            rotateRight(now);
             now = now->right; // the node is still the bottom node,and
 
         }
@@ -155,7 +156,7 @@ RBNode *RBinsertAdjust(RBTree *tree, RBNode *now) {
         rotateLeft(now->parent);
         return ret;
     }
-
+    return ret;
 }
 
 
