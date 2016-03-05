@@ -77,8 +77,11 @@ void rotateRight(RBNode *now) {
     RBNode *grandP = getGrandP(now);
     RBNode *parent = now->parent;
 
-    if(grandP != NULL){
-        grandP->left = now;
+    if (grandP != NULL) {
+        if (parent == grandP->left)
+            grandP->left = now;
+        else
+            grandP->right = now;
     }
     parent->parent = now;
     parent->left = now->right;
@@ -92,8 +95,11 @@ void rotateLeft(RBNode *now) {
     RBNode *grandP = getGrandP(now);
     RBNode *parent = now->parent;
 
-    if(grandP != NULL){
-        grandP->right = now;
+    if (grandP != NULL) { //omit the grandP direction
+        if (parent == grandP->left)
+            grandP->left = now;
+        else
+            grandP->right = now;
     }
     parent->parent = now;
     parent->right = now->left;
