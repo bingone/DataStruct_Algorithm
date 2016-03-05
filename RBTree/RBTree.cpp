@@ -18,6 +18,17 @@ RBNode *RBcreate(void *key, void *value) {
     return ret;
 }
 
+RBTree *RBcreateTree(int (*keyCompare)(void *k1, void *k2), int (*valueCompare)(void *v1, void *v2)) {
+    RBTree *ret = (RBTree *) malloc(sizeof(RBTree));
+    if (ret == NULL)
+        return ret;
+    ret->keyCompare = keyCompare;
+    ret->root = NULL;
+    ret->size = 0;
+    ret->valueCompare = valueCompare;
+    return ret;
+}
+
 RBNode *RBfind(RBTree *tree, void *key) {
     RBNode *root = tree->root;
     RBNode *now = root;
@@ -62,65 +73,87 @@ RBNode *getUncle(RBNode *now) {
  * when call rotate ,means the caller has made sure  3 Node ,ahaha
  */
 
-void rotateLeft(RBNode *now) {
-    RBNode *parent = now->parent;
-
-    parent->right = now->left;
-    now->left->parent = parent;
-
-    now->left = now->left->right;
-    now->parent = parent->right;
-    parent->right->right = now;
-}
-
 void rotateRight(RBNode *now) {
     RBNode *parent = now->parent;
+    RBNode *tmp = now->left->right;
+
+    parent->right = now->left;
+
+
+    now->left->right = now;
+    now->left->parent = parent;
+
+    now->parent = now->left;
+    now->left = tmp;
+    if (now->left != NULL)
+        now->left->parent = now;
+
+}
+
+void rotateLeft(RBNode *now) {
+    RBNode *parent = now->parent;
+    RBNode *tmp = now->right->left;
 
     parent->left = now->right;
+
+    now->right->left = now;
     now->right->parent = parent;
 
-    now->right = now->right->left;
-    now->parent = parent->left;
-    parent->left->left = now;
+    now->parent = now->right;
+    now->right = tmp;
+    if (now->right != NULL)
+        now->right->parent = now;
+
 
 }
 
 // insert
 // now != NULL
-void RBinsertAdjust(RBTree *tree, RBNode *now) {
+RBNode *RBinsertAdjust(RBTree *tree, RBNode *now) {
     RBNode *parent = now->parent;
     RBNode *uncle = getUncle(now);
     RBNode *grandP = getGrandP(now);
+    RBNode *ret = tree->root;
 //    case 1 just root or parent.color == BLACK
     if (parent == NULL) {
         tree->root = now;
         now->color = BLACK;
-//        return now;
-        return;
+        return now;
     } else if (parent->color == BLACK) {
-//        return now;
-        return;
+        return ret;
     } else if (uncle != NULL && uncle->color == RED) {
         parent->color = BLACK;
         uncle->color = BLACK;
         grandP->color = RED;
-        RBinsertAdjust(tree, getGrandP(now));
-//        return NULL;
-        return;
-    } else if (now == parent->left && grandP != NULL &&
-               grandP->right == parent) { // child and parent are not in one line ,RL
-        rotateRight(parent);
-        now = now->right; // the node is still the bottom node,and
+        return RBinsertAdjust(tree, getGrandP(now));
+    } else if (grandP != NULL && parent == grandP->left) {
+        if (grandP == ret) {
+            ret = parent;
+        }
+        if (now == parent->right) {
+            ret = now;
+            rotateLeft(parent);
+            now = now->left;
+        }
         now->parent->color = BLACK;
         now->parent->parent->color = RED;
-        rotateLeft(now);
-    } else if (now == parent->right && grandP != NULL &&
-               grandP->left == parent) { // child and parent are not in one line ,LR
-        rotateLeft(parent);
-        now = now->left;
+        rotateRight(now->parent);
+        return ret;
+    }
+    else if (grandP != NULL && parent == grandP->right) {
+        if (grandP == ret) {
+            ret = parent;
+        }
+        if (now == parent->left) {
+            ret = now;
+            rotateRight(parent);
+            now = now->right; // the node is still the bottom node,and
+
+        }
         now->parent->color = BLACK;
         now->parent->parent->color = RED;
-        rotateRight(now);
+        rotateLeft(now->parent);
+        return ret;
     }
 
 }
@@ -150,7 +183,7 @@ RBNode *RBinsert(RBTree *tree, RBNode *newNode) {
     }
     now = newNode;
     tree->size++;
-    RBinsertAdjust(tree, now);
+    tree->root = RBinsertAdjust(tree, now);
     return now;
 }
 
@@ -283,4 +316,92 @@ int RBdelete(RBTree *tree, void *key) {
     // rotate the nowNode
 }
 
+void RBdeleteDirect(RBNode *now) {
+    if (now == NULL)
+        return;
+    RBdeleteDirect(now->left);
+    RBdeleteDirect(now->right);
+}
 
+void RBdeleteTree(RBTree *tree) {
+    if (tree == NULL)
+        return;
+    RBdeleteDirect(tree->root);
+    free(tree);
+}
+
+void RBprintNode(RBNode *now, int level) {
+    if (now == NULL) {
+        printf("now={NULL}\n");
+        return;
+    }
+    char leftSpe[64], rightSpe[64], parentSpe[64];
+    char *parent = parentSpe, *left = leftSpe, *right = rightSpe;
+    if (now->key == NULL)
+        now->key = (void *) "NULL";
+    if (now->value == NULL)
+        now->value = (void *) "NULL";
+    if (now->parent == NULL)
+        parent = (char *) "NULL";
+    else {
+        sprintf(parent, "%p", now->parent);
+    }
+
+    if (now->left == NULL)
+        left = (char *) "NULL";
+    else {
+        sprintf(left, "%p", now->left);
+    }
+    if (now->right == NULL)
+        right = (char *) "NULL";
+    else {
+        sprintf(right, "%p", now->right);
+    }
+
+    printf("now={ptr=%p,key=%d,value=%d,parent=%s,color=%s,left=%s,right=%s}\n", now, *(int *) now->key,
+           *(int *) now->value,
+           parent, now->color == BLACK ? "BLACK" : "RED",
+           left, right);
+}
+
+void RBprintSimple(RBNode *now, int level) {
+    if (now == NULL)
+        return;
+    printf("{key=%d,val=%d,level=%d}\n", *(int *) now->key, *(int *) now->value, level);
+}
+
+void RBprintTree(RBNode *now, int *level) {
+    if (now == NULL)
+        return;
+    if (now->left != NULL) {
+        RBprintTree(now->left, level);
+    }
+
+    RBprintNode(now, *level);
+    if (now->right != NULL) {
+        RBprintTree(now->right, level);
+    }
+    (*level)++;
+}
+
+int defaultKeyCompare(void *k1, void *k2) {
+    int c1 = *(int *) k1;
+    int c2 = *(int *) k2;
+    if (c1 == c2)
+        return 0;
+    if (c1 < c2)
+        return -1;
+    if (c2 > c1)
+        return 1;
+}
+
+int defaultValCompare(void *v1, void *v2) {
+    int c1 = *(int *) v1;
+    int c2 = *(int *) v2;
+    if (c1 == c2)
+        return 0;
+    if (c1 < c2)
+        return -1;
+    if (c2 > c1)
+        return 1;
+}
