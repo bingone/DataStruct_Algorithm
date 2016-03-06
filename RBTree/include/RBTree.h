@@ -56,7 +56,7 @@ extern RBNode *RBinsert(RBTree *tree, RBNode *newNode);
 
 extern void RBremove(RBNode *del, RBNode *rep);
 
-extern RBNode *RBdeleteAdjust(RBTree *tree, RBNode *now);
+extern void RBdeleteAdjust(RBTree *tree, RBNode *now);
 
 extern int RBdelete(RBTree *tree, void *key);
 

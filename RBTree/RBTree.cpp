@@ -208,72 +208,88 @@ void RBremove(RBNode *del, RBNode *rep) {
 /**
  * if entrance the func ,meaning the node's color deleted is balck.
  */
-RBNode *RBdeleteAdjust(RBTree *tree, RBNode *now) {
+void RBdeleteAdjust(RBTree *tree, RBNode *now) {
 
     RBNode *parent;
     RBNode *ret;
     if (now == NULL)
-        return NULL;
+        return;
     parent = now->parent;
     ret = tree->root;
     // case 1 now's color is RED
     if (now->color == RED) {
         now->color = BLACK;
-        return ret;
+        return;
     }
 
-    // case 2 brother is red
+    // case 2 uncle's is red
     if (parent->left == now && parent->right != NULL && parent->right->color == RED) {
+        if (parent == ret) {
+            tree->root = parent;
+        }
         rotateLeft(parent->right);
         parent->color = RED;
         parent->parent->color = BLACK;
+        RBdeleteAdjust(tree, now);
+        return;
     } else if (parent->right == now && parent->left != NULL && parent->left->color == RED) {
+        if (parent == ret) {
+            tree->root = parent;
+        }
         rotateRight(parent->left);
         parent->color = RED;
         parent->parent->color = BLACK;
+        RBdeleteAdjust(tree, now);
+        return;
     }
 
-    // case 3
-    parent = now->parent;
+    // case 3 uncle's color is black,and uncle's children are both black
     if (parent->left == now && parent->right != NULL && (parent->right->left == NULL ||
                                                          parent->right->left->color == BLACK) &&
-        (parent->right->left == NULL ||
-         parent->right->left->color == BLACK)) {
+        (parent->right->right == NULL ||
+         parent->right->right->color == BLACK)) {
 
         parent->right->color = RED;
-        now = parent;
+        RBdeleteAdjust(tree, parent);
+        return;
     } else if (parent->right == now && parent->left != NULL && (parent->left->right == NULL ||
                                                                 parent->left->right->color == BLACK) &&
                (parent->left->left == NULL ||
                 parent->left->left->color == BLACK)) {
 
         parent->left->color = RED;
-        now = parent;
+        RBdeleteAdjust(tree, parent);
+        return;
     }
 
-    parent = now->parent;
+    //case 4 uncle's color is black,
     if (parent->left == now && parent->right != NULL && parent->right->color == BLACK &&
         parent->right->left != NULL && parent->right->left->color == RED &&
         (parent->right->right == NULL || parent->right->right->color == BLACK)) {
 
-        rotateRight(parent->right);
-        now->color = RED;
-        now->parent->color = BLACK;
-
+        rotateRight(parent->right->left);
+        now->parent->right->color = BLACK;
+        now->parent->right->right->color = RED;
+        RBdeleteAdjust(tree, now);
+        return;
     } else if (parent->right == now && parent->left != NULL && parent->left->color == BLACK &&
                parent->left->right != NULL && parent->left->right->color == RED &&
                parent->left->left->color == RED && parent->left->left->color == BLACK) {
 
-        rotateLeft(parent->left);
-        now->color = RED;
-        now->parent->color = BLACK;
+        rotateLeft(parent->left->right);
+        now->parent->left->color = BLACK;
+        now->parent->left->left->color = RED;
+        RBdeleteAdjust(tree, now);
+        return;
     }
 
-    parent = now->parent;
+    // case 5
     if (parent->left == now && parent->right != NULL && parent->right->color == BLACK &&
         parent->right->right != NULL && parent->right->right->color == RED) {
-
-        rotateLeft(parent);
+        if (parent == ret) {
+            tree->root = parent->right;
+        }
+        rotateLeft(parent->right);
         now = parent;
         now->color = BLACK;
         now->parent->color = RED;
@@ -281,8 +297,10 @@ RBNode *RBdeleteAdjust(RBTree *tree, RBNode *now) {
 
     } else if (parent->right == now && parent->left != NULL && parent->left->color == BLACK &&
                parent->left->left != NULL && parent->left->left->color == RED) {
-
-        rotateRight(parent);
+        if (parent == ret) {
+            tree->root = parent;
+        }
+        rotateRight(parent->left);
         now = parent;
         now->color = BLACK;
         now->parent->color = RED;
@@ -324,7 +342,6 @@ int RBdelete(RBTree *tree, void *key) {
     }
     // now the die'color is Black
     RBremove(del, now);
-    tree->root = RBdeleteAdjust(tree, now);
 
     // rotate the nowNode
 }

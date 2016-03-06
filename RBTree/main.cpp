@@ -19,17 +19,16 @@ int main() {
         RBprintSimple(now, 0);
     }
     int level = 0;
+    printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
     RBprintTree(tree->root, level);
-    printf("******************************\n");
+    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
     // test insert end
     RBNode *node = RBfind(tree,(void*)(arrKey+rand()%ARR_LEN));
     RBprintSimple(node,0);
     // test find end
-    node->value = (void *) (rand()%INT_RANGE);
-    RBupdate(tree,node);
+    RBdelete(tree,node->key);
+    printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
     RBprintTree(tree->root, level);
-    printf("******************************\n");
-    // test update end
-
+    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
     return 0;
 }
