@@ -88,7 +88,6 @@ void rotateRight(RBNode *now) {
 
     now->right = parent;
     now->parent = grandP;
-
 }
 
 void rotateLeft(RBNode *now) {
@@ -106,8 +105,6 @@ void rotateLeft(RBNode *now) {
 
     now->left = parent;
     now->parent = grandP;
-
-
 }
 
 // insert
@@ -208,15 +205,24 @@ void RBremove(RBNode *del, RBNode *rep) {
     free(del);
 }
 
-void RBdeleteAdjust(RBTree *tree, RBNode *now) {
+/**
+ * if entrance the func ,meaning the node's color deleted is balck.
+ */
+RBNode *RBdeleteAdjust(RBTree *tree, RBNode *now) {
 
-    RBNode *parent = now->parent;
-
+    RBNode *parent;
+    RBNode *ret;
+    if (now == NULL)
+        return NULL;
+    parent = now->parent;
+    ret = tree->root;
+    // case 1 now's color is RED
     if (now->color == RED) {
         now->color = BLACK;
-        return;
+        return ret;
     }
-    // brother is red
+
+    // case 2 brother is red
     if (parent->left == now && parent->right != NULL && parent->right->color == RED) {
         rotateLeft(parent->right);
         parent->color = RED;
@@ -227,6 +233,7 @@ void RBdeleteAdjust(RBTree *tree, RBNode *now) {
         parent->parent->color = BLACK;
     }
 
+    // case 3
     parent = now->parent;
     if (parent->left == now && parent->right != NULL && (parent->right->left == NULL ||
                                                          parent->right->left->color == BLACK) &&
@@ -317,8 +324,7 @@ int RBdelete(RBTree *tree, void *key) {
     }
     // now the die'color is Black
     RBremove(del, now);
-
-    RBdeleteAdjust(tree, now);
+    tree->root = RBdeleteAdjust(tree, now);
 
     // rotate the nowNode
 }
@@ -365,7 +371,7 @@ void RBprintNode(RBNode *now, int level) {
     else {
         sprintf(right, "%p", now->right);
     }
-    while(level--) printf("\t");
+    while (level--) printf("\t");
     printf("now={ptr=%p,key=%d,value=%d,parent=%s,color=%s,left=%s,right=%s}\n", now, *(int *) now->key,
            *(int *) now->value,
            parent, now->color == BLACK ? "BLACK" : "RED",
@@ -382,12 +388,12 @@ void RBprintTree(RBNode *now, int level) {
     if (now == NULL)
         return;
     if (now->left != NULL) {
-        RBprintTree(now->left, level+1);
+        RBprintTree(now->left, level + 1);
     }
 
     RBprintNode(now, level);
     if (now->right != NULL) {
-        RBprintTree(now->right, level+1);
+        RBprintTree(now->right, level + 1);
     }
 }
 

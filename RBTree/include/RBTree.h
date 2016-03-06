@@ -50,21 +50,19 @@ extern void rotateLeft(RBNode *now);
 
 extern void rotateRight(RBNode *now);
 
-extern RBNode * RBinsertAdjust(RBTree *tree, RBNode *now);
+extern RBNode *RBinsertAdjust(RBTree *tree, RBNode *now);
 
 extern RBNode *RBinsert(RBTree *tree, RBNode *newNode);
 
 extern void RBremove(RBNode *del, RBNode *rep);
 
-extern void RBdeleteAdjust(RBTree *tree, RBNode *now);
+extern RBNode *RBdeleteAdjust(RBTree *tree, RBNode *now);
 
 extern int RBdelete(RBTree *tree, void *key);
 
 extern void RBdeleteTree(RBTree *tree);
 
 extern void RBdeleteDirect(RBNode *now);
-
-extern void RBprint(RBNode *now, int level);
 
 extern void RBprintSimple(RBNode *now, int level);
 

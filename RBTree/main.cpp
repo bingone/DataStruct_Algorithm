@@ -22,7 +22,7 @@ int main() {
     RBprintTree(tree->root, level);
     printf("******************************\n");
     // test insert end
-    RBNode *node = RBfind(tree,(void*)arrKey+rand()%ARR_LEN);
+    RBNode *node = RBfind(tree,(void*)(arrKey+rand()%ARR_LEN));
     RBprintSimple(node,0);
     // test find end
     node->value = (void *) (rand()%INT_RANGE);
