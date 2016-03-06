@@ -68,7 +68,7 @@ extern void RBprint(RBNode *now, int level);
 
 extern void RBprintSimple(RBNode *now, int level);
 
-extern void RBprintTree(RBNode *now, int *level);
+extern void RBprintTree(RBNode *now, int level);
 
 extern int defaultKeyCompare(void *k1, void *k2);
 

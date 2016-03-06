@@ -328,6 +328,7 @@ void RBdeleteDirect(RBNode *now) {
         return;
     RBdeleteDirect(now->left);
     RBdeleteDirect(now->right);
+    free(now);
 }
 
 void RBdeleteTree(RBTree *tree) {
@@ -364,7 +365,7 @@ void RBprintNode(RBNode *now, int level) {
     else {
         sprintf(right, "%p", now->right);
     }
-
+    while(level--) printf("\t");
     printf("now={ptr=%p,key=%d,value=%d,parent=%s,color=%s,left=%s,right=%s}\n", now, *(int *) now->key,
            *(int *) now->value,
            parent, now->color == BLACK ? "BLACK" : "RED",
@@ -377,18 +378,17 @@ void RBprintSimple(RBNode *now, int level) {
     printf("{key=%d,val=%d,level=%d}\n", *(int *) now->key, *(int *) now->value, level);
 }
 
-void RBprintTree(RBNode *now, int *level) {
+void RBprintTree(RBNode *now, int level) {
     if (now == NULL)
         return;
     if (now->left != NULL) {
-        RBprintTree(now->left, level);
+        RBprintTree(now->left, level+1);
     }
 
-    RBprintNode(now, *level);
+    RBprintNode(now, level);
     if (now->right != NULL) {
-        RBprintTree(now->right, level);
+        RBprintTree(now->right, level+1);
     }
-    (*level)++;
 }
 
 int defaultKeyCompare(void *k1, void *k2) {
