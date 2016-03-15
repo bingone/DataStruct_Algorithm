@@ -26,9 +26,14 @@ int main() {
     RBNode *node = RBfind(tree,(void*)(arrKey+rand()%ARR_LEN));
     RBprintSimple(node,0);
     // test find end
-    RBdelete(tree,node->key);
-    printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+    for (int i = 0; i < ARR_LEN; i++) {
+        RBdelete(tree, (void *) (arrKey+i));
+        printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+        printf("tree size = %d,ready to delete Node{key=%d,value=%d}\n",tree->size,arrKey[i],arrVal[i]);
+        RBprintTree(tree->root, level);
+        printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+    }
+    RBdeleteTree(tree);
     RBprintTree(tree->root, level);
-    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
     return 0;
 }
